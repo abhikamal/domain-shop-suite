@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Search, Package } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import ImageUpload from '@/components/ImageUpload';
+import MultiImageUpload from '@/components/MultiImageUpload';
 
 interface Product {
   id: string;
@@ -46,16 +46,26 @@ const AdminProducts = ({ products, categories, onRefresh }: AdminProductsProps) 
     name: '',
     description: '',
     price: 0,
-    image_url: '',
+    images: [] as string[],
     category_id: '',
     is_available: true,
     is_free: false,
   });
 
   const resetForm = () => {
-    setForm({ name: '', description: '', price: 0, image_url: '', category_id: '', is_available: true, is_free: false });
+    setForm({ name: '', description: '', price: 0, images: [], category_id: '', is_available: true, is_free: false });
     setEditingId(null);
     setOpen(false);
+  };
+
+  const loadProductImages = async (productId: string) => {
+    const { data } = await supabase
+      .from('product_images')
+      .select('image_url')
+      .eq('product_id', productId)
+      .order('display_order');
+    
+    return data?.map(img => img.image_url) || [];
   };
 
   const handleSave = async () => {
@@ -68,7 +78,7 @@ const AdminProducts = ({ products, categories, onRefresh }: AdminProductsProps) 
       name: form.name,
       description: form.description || null,
       price: form.price,
-      image_url: form.image_url || null,
+      image_url: form.images[0] || null,
       category_id: form.category_id || null,
       is_available: form.is_available,
       is_free: form.is_free,
@@ -79,31 +89,60 @@ const AdminProducts = ({ products, categories, onRefresh }: AdminProductsProps) 
       
       if (error) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Product updated' });
-        resetForm();
-        onRefresh();
+        return;
       }
+
+      // Update product images
+      await supabase.from('product_images').delete().eq('product_id', editingId);
+      if (form.images.length > 0) {
+        const imageRecords = form.images.map((url, index) => ({
+          product_id: editingId,
+          image_url: url,
+          display_order: index,
+        }));
+        await supabase.from('product_images').insert(imageRecords);
+      }
+
+      toast({ title: 'Product updated' });
+      resetForm();
+      onRefresh();
     } else {
-      const { error } = await supabase.from('products').insert({ ...payload, seller_id: user?.id });
+      const { data: product, error } = await supabase
+        .from('products')
+        .insert({ ...payload, seller_id: user?.id })
+        .select()
+        .single();
       
       if (error) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Product created' });
-        resetForm();
-        onRefresh();
+        return;
       }
+
+      // Insert product images
+      if (form.images.length > 0) {
+        const imageRecords = form.images.map((url, index) => ({
+          product_id: product.id,
+          image_url: url,
+          display_order: index,
+        }));
+        await supabase.from('product_images').insert(imageRecords);
+      }
+
+      toast({ title: 'Product created' });
+      resetForm();
+      onRefresh();
     }
   };
 
-  const handleEdit = (product: Product) => {
+  const handleEdit = async (product: Product) => {
     setEditingId(product.id);
+    const images = await loadProductImages(product.id);
+    
     setForm({
       name: product.name,
       description: product.description || '',
       price: product.price,
-      image_url: product.image_url || '',
+      images: images.length > 0 ? images : (product.image_url ? [product.image_url] : []),
       category_id: product.category_id || '',
       is_available: product.is_available ?? true,
       is_free: product.is_free ?? false,
@@ -177,10 +216,11 @@ const AdminProducts = ({ products, categories, onRefresh }: AdminProductsProps) 
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">Product Image</label>
-                <ImageUpload
-                  onImageUploaded={(url) => setForm({ ...form, image_url: url })}
-                  currentImageUrl={form.image_url}
+                <label className="text-sm font-medium">Product Images</label>
+                <MultiImageUpload
+                  onImagesChange={(urls) => setForm({ ...form, images: urls })}
+                  currentImages={form.images}
+                  maxImages={5}
                   className="mt-1"
                 />
               </div>

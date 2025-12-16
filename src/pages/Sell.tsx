@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import ImageUpload from '@/components/ImageUpload';
+import MultiImageUpload from '@/components/MultiImageUpload';
 
 const Sell = () => {
   const { user } = useAuth();
@@ -17,7 +17,14 @@ const Sell = () => {
   const { toast } = useToast();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ name: '', description: '', price: '', categoryId: '', isFree: false, imageUrl: '' });
+  const [form, setForm] = useState({ 
+    name: '', 
+    description: '', 
+    price: '', 
+    categoryId: '', 
+    isFree: false, 
+    images: [] as string[] 
+  });
 
   useEffect(() => {
     if (!user) { navigate('/auth'); return; }
@@ -26,20 +33,55 @@ const Sell = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.categoryId) { toast({ title: 'Please fill required fields', variant: 'destructive' }); return; }
+    if (!form.name || !form.categoryId) { 
+      toast({ title: 'Please fill required fields', variant: 'destructive' }); 
+      return; 
+    }
+    
     setLoading(true);
-    const { error } = await supabase.from('products').insert({
-      seller_id: user!.id,
-      name: form.name,
-      description: form.description,
-      price: form.isFree ? 0 : parseFloat(form.price) || 0,
-      category_id: form.categoryId,
-      is_free: form.isFree,
-      image_url: form.imageUrl || null,
-    });
-    setLoading(false);
-    if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); }
-    else { toast({ title: 'Product listed!' }); navigate('/products'); }
+    
+    try {
+      // Create product with first image as main
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .insert({
+          seller_id: user!.id,
+          name: form.name,
+          description: form.description,
+          price: form.isFree ? 0 : parseFloat(form.price) || 0,
+          category_id: form.categoryId,
+          is_free: form.isFree,
+          image_url: form.images[0] || null,
+        })
+        .select()
+        .single();
+
+      if (productError) throw productError;
+
+      // Insert additional images to product_images table
+      if (form.images.length > 0) {
+        const imageRecords = form.images.map((url, index) => ({
+          product_id: product.id,
+          image_url: url,
+          display_order: index,
+        }));
+
+        const { error: imagesError } = await supabase
+          .from('product_images')
+          .insert(imageRecords);
+
+        if (imagesError) {
+          console.error('Error saving images:', imagesError);
+        }
+      }
+
+      toast({ title: 'Product listed!' });
+      navigate('/products');
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,10 +115,11 @@ const Sell = () => {
             <Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="mt-1" />
           </div>
           <div>
-            <label className="text-sm font-medium">Product Image</label>
-            <ImageUpload 
-              onImageUploaded={(url) => setForm({ ...form, imageUrl: url })} 
-              currentImageUrl={form.imageUrl}
+            <label className="text-sm font-medium">Product Images</label>
+            <MultiImageUpload 
+              onImagesChange={(urls) => setForm({ ...form, images: urls })} 
+              currentImages={form.images}
+              maxImages={5}
               className="mt-1"
             />
           </div>
