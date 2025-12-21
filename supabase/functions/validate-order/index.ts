@@ -51,11 +51,11 @@ serve(async (req) => {
     
     console.log(`Validating order - User: ${user.id}, Product: ${product_id}, Quantity: ${quantity}, Payment: ${payment_method}`);
 
-    // Validate quantity
-    if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 100) {
+    // Validate quantity - single unit only
+    if (!Number.isInteger(quantity) || quantity !== 1) {
       console.error("Invalid quantity:", quantity);
       return new Response(
-        JSON.stringify({ error: "Invalid quantity. Must be between 1 and 100." }),
+        JSON.stringify({ error: "Each product is single unit only. Quantity must be 1." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -102,9 +102,43 @@ serve(async (req) => {
       );
     }
 
+    // Check for existing active orders for this product (pending, confirmed, shipped)
+    // Only cancelled and delivered orders allow repurchase
+    const { data: existingOrders, error: existingOrdersError } = await supabaseAdmin
+      .from("orders")
+      .select("id, status")
+      .eq("product_id", product_id)
+      .in("status", ["pending", "confirmed", "shipped"]);
+
+    if (existingOrdersError) {
+      console.error("Error checking existing orders:", existingOrdersError);
+      return new Response(
+        JSON.stringify({ error: "Failed to validate order" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (existingOrders && existingOrders.length > 0) {
+      console.log("Product has active orders:", existingOrders);
+      return new Response(
+        JSON.stringify({ error: "This product already has an active order. It can only be purchased after the current order is cancelled or delivered." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Calculate total server-side with validated price
     const total_amount = product.price * quantity;
     console.log(`Calculated total: ${total_amount} (price: ${product.price} x quantity: ${quantity})`);
+
+    // Mark product as unavailable when creating order
+    const { error: updateProductError } = await supabaseAdmin
+      .from("products")
+      .update({ is_available: false })
+      .eq("id", product_id);
+
+    if (updateProductError) {
+      console.error("Failed to update product availability:", updateProductError);
+    }
 
     // Create order with validated data using admin client
     const { data: order, error: orderError } = await supabaseAdmin
@@ -124,6 +158,12 @@ serve(async (req) => {
 
     if (orderError) {
       console.error("Order creation failed:", orderError);
+      // Revert product availability if order fails
+      await supabaseAdmin
+        .from("products")
+        .update({ is_available: true })
+        .eq("id", product_id);
+      
       return new Response(
         JSON.stringify({ error: "Failed to create order" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

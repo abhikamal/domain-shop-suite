@@ -26,6 +26,7 @@ interface Order {
   confirmed_at: string | null;
   confirmed_by: string | null;
   executive_notes: string | null;
+  product_id?: string | null;
   products?: { name: string } | null;
   profiles?: { full_name: string; phone_number: string | null; username: string | null } | null;
 }
@@ -55,7 +56,7 @@ const AdminOrders = ({ orders, onRefresh }: AdminOrdersProps) => {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [executiveNotes, setExecutiveNotes] = useState('');
 
-  const updateStatus = async (orderId: string, status: OrderStatus) => {
+  const updateStatus = async (orderId: string, status: OrderStatus, productId?: string | null) => {
     const updateData: any = { status };
     
     // If confirming, add confirmation details
@@ -69,7 +70,21 @@ const AdminOrders = ({ orders, onRefresh }: AdminOrdersProps) => {
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Order status updated' });
+      // Handle product availability based on order status
+      if (productId) {
+        if (status === 'cancelled') {
+          // Make product available again when order is cancelled
+          await supabase.from('products').update({ is_available: true }).eq('id', productId);
+          toast({ title: 'Order cancelled', description: 'Product is now available for purchase again.' });
+        } else if (status === 'delivered') {
+          // Keep product unavailable when delivered (sold)
+          toast({ title: 'Order delivered', description: 'Product has been marked as sold.' });
+        } else {
+          toast({ title: 'Order status updated' });
+        }
+      } else {
+        toast({ title: 'Order status updated' });
+      }
       onRefresh();
     }
   };
@@ -272,7 +287,7 @@ const AdminOrders = ({ orders, onRefresh }: AdminOrdersProps) => {
                         <>
                           <Select
                             value={order.status}
-                            onValueChange={(v: OrderStatus) => updateStatus(order.id, v)}
+                            onValueChange={(v: OrderStatus) => updateStatus(order.id, v, order.product_id)}
                           >
                             <SelectTrigger className="w-24 h-8 text-xs">
                               <SelectValue />
@@ -351,7 +366,7 @@ const AdminOrders = ({ orders, onRefresh }: AdminOrdersProps) => {
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  updateStatus(selectedOrder.id, 'cancelled');
+                  updateStatus(selectedOrder.id, 'cancelled', selectedOrder.product_id);
                   setConfirmDialogOpen(false);
                 }}>
                   Cancel Order
