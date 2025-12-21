@@ -95,9 +95,24 @@ const Admin = () => {
   const fetchOrders = async () => {
     const { data } = await supabase
       .from('orders')
-      .select('*, products(name), profiles!orders_buyer_id_fkey(full_name, phone_number, username)')
+      .select('*, products(name)')
       .order('created_at', { ascending: false });
-    if (data) setOrders(data);
+    
+    if (data) {
+      // Fetch buyer profiles separately
+      const buyerIds = [...new Set(data.map(o => o.buyer_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, phone_number, username')
+        .in('user_id', buyerIds);
+      
+      const profilesMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      const ordersWithProfiles = data.map(order => ({
+        ...order,
+        profiles: profilesMap.get(order.buyer_id) || null
+      }));
+      setOrders(ordersWithProfiles);
+    }
   };
 
   const fetchUsers = async () => {
@@ -112,8 +127,23 @@ const Admin = () => {
   const fetchProducts = async () => {
     const { data } = await supabase
       .from('products')
-      .select('*, profiles!products_seller_id_fkey(full_name)');
-    if (data) setProducts(data);
+      .select('*');
+    
+    if (data) {
+      // Fetch seller profiles separately
+      const sellerIds = [...new Set(data.map(p => p.seller_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', sellerIds);
+      
+      const profilesMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      const productsWithProfiles = data.map(product => ({
+        ...product,
+        profiles: profilesMap.get(product.seller_id) || null
+      }));
+      setProducts(productsWithProfiles);
+    }
   };
 
   const fetchCategories = async () => {
