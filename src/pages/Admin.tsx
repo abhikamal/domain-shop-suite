@@ -10,37 +10,123 @@ import AdminUsers from '@/components/admin/AdminUsers';
 import AdminProducts from '@/components/admin/AdminProducts';
 import AdminCategories from '@/components/admin/AdminCategories';
 import AdminSettings from '@/components/admin/AdminSettings';
-import { LayoutDashboard, ShoppingCart, Users, Package, FolderOpen, Settings } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Users, Package, FolderOpen, Settings, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const Admin = () => {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
     if (!user || !isAdmin) { navigate('/'); return; }
     fetchData();
+    
+    // Set up real-time subscriptions
+    const ordersChannel = supabase
+      .channel('admin-orders-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        (payload) => {
+          console.log('Orders change:', payload);
+          fetchOrders();
+          setLastUpdate(new Date());
+          toast({ title: 'Orders updated', description: 'Order data has been refreshed.' });
+        }
+      )
+      .subscribe();
+
+    const productsChannel = supabase
+      .channel('admin-products-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'products' },
+        (payload) => {
+          console.log('Products change:', payload);
+          fetchProducts();
+          setLastUpdate(new Date());
+        }
+      )
+      .subscribe();
+
+    const profilesChannel = supabase
+      .channel('admin-profiles-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        (payload) => {
+          console.log('Profiles change:', payload);
+          fetchUsers();
+          setLastUpdate(new Date());
+        }
+      )
+      .subscribe();
+
+    const categoriesChannel = supabase
+      .channel('admin-categories-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'categories' },
+        (payload) => {
+          console.log('Categories change:', payload);
+          fetchCategories();
+          setLastUpdate(new Date());
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(productsChannel);
+      supabase.removeChannel(profilesChannel);
+      supabase.removeChannel(categoriesChannel);
+    };
   }, [user, isAdmin]);
+
+  const fetchOrders = async () => {
+    const { data } = await supabase
+      .from('orders')
+      .select('*, products(name), profiles!orders_buyer_id_fkey(full_name, phone_number, username)')
+      .order('created_at', { ascending: false });
+    if (data) setOrders(data);
+  };
+
+  const fetchUsers = async () => {
+    const [usersRes, rolesRes] = await Promise.all([
+      supabase.from('profiles').select('*'),
+      supabase.from('user_roles').select('*'),
+    ]);
+    if (usersRes.data) setUsers(usersRes.data);
+    if (rolesRes.data) setUserRoles(rolesRes.data);
+  };
+
+  const fetchProducts = async () => {
+    const { data } = await supabase
+      .from('products')
+      .select('*, profiles!products_seller_id_fkey(full_name)');
+    if (data) setProducts(data);
+  };
+
+  const fetchCategories = async () => {
+    const { data } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name');
+    if (data) setCategories(data);
+  };
 
   const fetchData = async () => {
     setLoading(true);
-    const [ordersRes, usersRes, rolesRes, productsRes, categoriesRes] = await Promise.all([
-      supabase.from('orders').select('*, products(name), profiles!orders_buyer_id_fkey(full_name, phone_number, username)').order('created_at', { ascending: false }),
-      supabase.from('profiles').select('*'),
-      supabase.from('user_roles').select('*'),
-      supabase.from('products').select('*, profiles!products_seller_id_fkey(full_name)'),
-      supabase.from('categories').select('*').order('name'),
-    ]);
-    if (ordersRes.data) setOrders(ordersRes.data);
-    if (usersRes.data) setUsers(usersRes.data);
-    if (rolesRes.data) setUserRoles(rolesRes.data);
-    if (productsRes.data) setProducts(productsRes.data);
-    if (categoriesRes.data) setCategories(categoriesRes.data);
+    await Promise.all([fetchOrders(), fetchUsers(), fetchProducts(), fetchCategories()]);
     setLoading(false);
   };
 
@@ -57,7 +143,18 @@ const Admin = () => {
   return (
     <Layout>
       <div className="container mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold text-eco-dark mb-8">Admin Panel</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-eco-dark">Admin Panel</h1>
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-muted-foreground">
+              Last updated: {lastUpdate.toLocaleTimeString()}
+            </span>
+            <Button variant="outline" size="sm" onClick={fetchData}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
+        </div>
         <Tabs defaultValue="dashboard" className="glass-card-solid rounded-2xl p-6">
           <TabsList className="mb-6 flex-wrap h-auto gap-2">
             <TabsTrigger value="dashboard" className="gap-2">
