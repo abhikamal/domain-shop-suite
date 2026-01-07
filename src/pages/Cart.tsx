@@ -138,17 +138,29 @@ const Cart = () => {
         });
 
         if (error) {
-          // Try to parse error message from FunctionsHttpError
-          let errorMessage = 'Failed to process order';
+          // Parse user-friendly error message
+          let errorMessage = 'Unable to complete your order. Please try again.';
           try {
             const errorBody = await error.context?.json?.();
-            errorMessage = errorBody?.error || error.message || errorMessage;
+            if (errorBody?.error) {
+              // Convert technical errors to user-friendly messages
+              const rawError = errorBody.error;
+              if (rawError.includes('own product')) {
+                errorMessage = 'You cannot purchase your own product.';
+              } else if (rawError.includes('not available')) {
+                errorMessage = 'This product is no longer available.';
+              } else if (rawError.includes('pending order')) {
+                errorMessage = 'This product already has a pending order. Please wait or try another product.';
+              } else {
+                errorMessage = rawError;
+              }
+            }
           } catch {
-            errorMessage = error.message || errorMessage;
+            // Keep default message
           }
           
           toast({ 
-            title: `Order Failed: ${item.products.name}`, 
+            title: 'Order Failed', 
             description: errorMessage,
             variant: 'destructive' 
           });
