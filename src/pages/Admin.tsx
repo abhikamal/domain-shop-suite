@@ -10,12 +10,13 @@ import AdminUsers from '@/components/admin/AdminUsers';
 import AdminProducts from '@/components/admin/AdminProducts';
 import AdminCategories from '@/components/admin/AdminCategories';
 import AdminSettings from '@/components/admin/AdminSettings';
-import { LayoutDashboard, ShoppingCart, Users, Package, FolderOpen, Settings, RefreshCw } from 'lucide-react';
+import AdminActivityLogs from '@/components/admin/AdminActivityLogs';
+import { LayoutDashboard, ShoppingCart, Users, Package, FolderOpen, Settings, RefreshCw, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 const Admin = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [orders, setOrders] = useState<any[]>([]);
@@ -205,6 +206,11 @@ const Admin = () => {
             <TabsTrigger value="settings" className="gap-2">
               <Settings className="h-4 w-4" /> Settings
             </TabsTrigger>
+            {isSuperAdmin && (
+              <TabsTrigger value="activity-logs" className="gap-2">
+                <Activity className="h-4 w-4" /> Activity Logs
+              </TabsTrigger>
+            )}
           </TabsList>
           
           <TabsContent value="dashboard">
@@ -230,6 +236,12 @@ const Admin = () => {
           <TabsContent value="settings">
             <AdminSettings />
           </TabsContent>
+
+          {isSuperAdmin && (
+            <TabsContent value="activity-logs">
+              <AdminActivityLogs isSuperAdmin={isSuperAdmin} />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </Layout>
