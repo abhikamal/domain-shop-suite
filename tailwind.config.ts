@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        poppins: ['Poppins', 'sans-serif'],
+        orbitron: ['Orbitron', 'sans-serif'],
+        rajdhani: ['Rajdhani', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -60,10 +61,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        eco: {
-          primary: "hsl(var(--eco-primary))",
-          secondary: "hsl(var(--eco-secondary))",
-          dark: "hsl(var(--eco-dark))",
+        neon: {
+          green: "hsl(var(--neon-green))",
+          blue: "hsl(var(--neon-blue))",
+          purple: "hsl(var(--neon-purple))",
+          pink: "hsl(var(--neon-pink))",
+        },
+        surface: {
+          1: "hsl(var(--surface-1))",
+          2: "hsl(var(--surface-2))",
+          3: "hsl(var(--surface-3))",
         },
       },
       borderRadius: {
@@ -88,15 +95,30 @@ export default {
           from: { opacity: "0", transform: "translateY(20px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 20px hsl(142 100% 50% / 0.4)" },
+          "50%": { boxShadow: "0 0 40px hsl(142 100% 50% / 0.6), 0 0 60px hsl(195 100% 50% / 0.3)" },
+        },
+        "glow-pulse": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out forwards",
         "slide-up": "slide-up 0.5s ease-out forwards",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
       },
       backdropBlur: {
         xs: "2px",
+      },
+      boxShadow: {
+        'neon-green': '0 0 20px hsl(142 100% 50% / 0.4), 0 0 40px hsl(142 100% 50% / 0.2)',
+        'neon-blue': '0 0 20px hsl(195 100% 50% / 0.4), 0 0 40px hsl(195 100% 50% / 0.2)',
+        'neon-purple': '0 0 20px hsl(280 100% 60% / 0.4), 0 0 40px hsl(280 100% 60% / 0.2)',
       },
     },
   },
