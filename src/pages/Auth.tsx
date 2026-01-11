@@ -25,6 +25,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [errors, setErrors] = useState<{ 
     email?: string; 
@@ -36,19 +37,44 @@ const Auth = () => {
     terms?: string 
   }>({});
 
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user } = useAuth();
   const { validateEmail, getDomainsText, loading: domainLoading } = useAllowedDomain();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const domainsText = getDomainsText();
 
-  // Check if user arrived from password reset link
+  // Check if user arrived from password reset link and handle session
   useEffect(() => {
     const isReset = searchParams.get('reset') === 'true';
-    if (isReset) {
-      setView('reset-password');
-    }
+    
+    // Listen for auth state changes (important for password reset flow)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event, 'Has session:', !!session);
+      
+      if (event === 'PASSWORD_RECOVERY' || (isReset && session)) {
+        setView('reset-password');
+        setSessionLoading(false);
+      } else if (event === 'SIGNED_IN' && !isReset) {
+        // User logged in normally, redirect to home
+        setSessionLoading(false);
+      } else {
+        setSessionLoading(false);
+      }
+    });
+
+    // Also check current session on mount
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (isReset && session) {
+        setView('reset-password');
+      }
+      setSessionLoading(false);
+    };
+    
+    checkSession();
+
+    return () => subscription.unsubscribe();
   }, [searchParams]);
 
   const emailSchema = z.string().email('Invalid email address').refine(
@@ -237,6 +263,18 @@ const Auth = () => {
     setPassword('');
     setConfirmPassword('');
   };
+
+  // Show loading while checking session (for password reset flow)
+  if (sessionLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className="glass-card p-8 w-full max-w-md neon-border animate-scale-in flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-neon-green" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Reset Password View
   if (view === 'reset-password') {
