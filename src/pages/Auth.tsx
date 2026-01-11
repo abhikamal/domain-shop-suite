@@ -188,17 +188,17 @@ const Auth = () => {
   // Forgot Password View
   if (view === 'forgot-password') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="auth-container animate-scale-in">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className="glass-card p-8 w-full max-w-md neon-border animate-scale-in">
           <button
             onClick={() => switchView('login')}
-            className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-4 text-sm"
+            className="flex items-center gap-1 text-muted-foreground hover:text-neon-green mb-4 text-sm transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Login
           </button>
           
-          <h2 className="text-2xl font-bold text-center text-primary mb-2">
+          <h2 className="text-2xl font-bold text-center text-neon-green mb-2 font-orbitron">
             Forgot Password
           </h2>
           <p className="text-center text-muted-foreground text-sm mb-6">
@@ -212,17 +212,17 @@ const Auth = () => {
                 placeholder={domainsText ? `Enter College Email (${domainsText})` : 'Enter your email'}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-12 bg-white border-border"
+                className="w-full h-12 bg-surface-dark border-white/10 text-foreground placeholder:text-muted-foreground focus:border-neon-green focus:ring-neon-green/20"
               />
               {errors.email && (
-                <p className="text-destructive text-sm mt-1">{errors.email}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
             </div>
 
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 eco-gradient-primary text-white font-semibold rounded-lg hover:opacity-90 transition-opacity"
+              className="w-full h-12 bg-neon-green text-black font-semibold rounded-lg hover:bg-neon-green/90 hover:shadow-neon-green transition-all font-rajdhani text-lg"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Reset Link'}
             </Button>
@@ -233,9 +233,9 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="auth-container animate-scale-in">
-        <h2 className="text-2xl font-bold text-center text-primary mb-6">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="glass-card p-8 w-full max-w-md neon-border animate-scale-in">
+        <h2 className="text-2xl font-bold text-center text-neon-green mb-6 font-orbitron">
           {view === 'login' ? 'Login' : 'Sign Up'}
         </h2>
 
@@ -248,10 +248,10 @@ const Auth = () => {
                   placeholder="Enter Full Name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full h-12 bg-white border-border"
+                  className="w-full h-12 bg-surface-dark border-white/10 text-foreground placeholder:text-muted-foreground focus:border-neon-green focus:ring-neon-green/20"
                 />
                 {errors.fullName && (
-                  <p className="text-destructive text-sm mt-1">{errors.fullName}</p>
+                  <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
                 )}
               </div>
 
@@ -262,10 +262,10 @@ const Auth = () => {
                   placeholder="Choose a username (public)"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full h-12 bg-white border-border pl-10"
+                  className="w-full h-12 bg-surface-dark border-white/10 text-foreground placeholder:text-muted-foreground pl-10 focus:border-neon-green focus:ring-neon-green/20"
                 />
                 {errors.username && (
-                  <p className="text-destructive text-sm mt-1">{errors.username}</p>
+                  <p className="text-red-500 text-sm mt-1">{errors.username}</p>
                 )}
               </div>
 
@@ -276,10 +276,10 @@ const Auth = () => {
                   placeholder="Phone Number (for order confirmation)"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full h-12 bg-white border-border pl-10"
+                  className="w-full h-12 bg-surface-dark border-white/10 text-foreground placeholder:text-muted-foreground pl-10 focus:border-neon-green focus:ring-neon-green/20"
                 />
                 {errors.phoneNumber && (
-                  <p className="text-destructive text-sm mt-1">{errors.phoneNumber}</p>
+                  <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>
                 )}
               </div>
             </>
@@ -291,10 +291,10 @@ const Auth = () => {
               placeholder={domainsText ? `Enter College Email (${domainsText})` : 'Enter your email'}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-12 bg-white border-border"
+              className="w-full h-12 bg-surface-dark border-white/10 text-foreground placeholder:text-muted-foreground focus:border-neon-green focus:ring-neon-green/20"
             />
             {errors.email && (
-              <p className="text-destructive text-sm mt-1">{errors.email}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
 
@@ -304,17 +304,17 @@ const Auth = () => {
               placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-12 bg-white border-border pr-10"
+              className="w-full h-12 bg-surface-dark border-white/10 text-foreground placeholder:text-muted-foreground pr-10 focus:border-neon-green focus:ring-neon-green/20"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-neon-green transition-colors"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
             {errors.password && (
-              <p className="text-destructive text-sm mt-1">{errors.password}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
           </div>
 
@@ -323,7 +323,7 @@ const Auth = () => {
               <button
                 type="button"
                 onClick={() => switchView('forgot-password')}
-                className="text-sm text-secondary hover:underline"
+                className="text-sm text-neon-blue hover:text-neon-green transition-colors"
               >
                 Forgot Password?
               </button>
@@ -337,19 +337,19 @@ const Auth = () => {
                   id="terms"
                   checked={acceptedTerms}
                   onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
-                  className="mt-1"
+                  className="mt-1 border-white/20 data-[state=checked]:bg-neon-green data-[state=checked]:border-neon-green"
                 />
                 <label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed">
                   I agree to the{' '}
                   <TermsDialog>
-                    <button type="button" className="text-primary font-semibold hover:underline">
+                    <button type="button" className="text-neon-green font-semibold hover:underline">
                       Terms and Conditions
                     </button>
                   </TermsDialog>
                 </label>
               </div>
               {errors.terms && (
-                <p className="text-destructive text-sm">{errors.terms}</p>
+                <p className="text-red-500 text-sm">{errors.terms}</p>
               )}
             </div>
           )}
@@ -357,7 +357,7 @@ const Auth = () => {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-12 eco-gradient-primary text-white font-semibold rounded-lg hover:opacity-90 transition-opacity"
+            className="w-full h-12 bg-neon-green text-black font-semibold rounded-lg hover:bg-neon-green/90 hover:shadow-neon-green transition-all font-rajdhani text-lg"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -373,7 +373,7 @@ const Auth = () => {
           {view === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
           <button
             onClick={() => switchView(view === 'login' ? 'signup' : 'login')}
-            className="text-secondary font-semibold hover:underline"
+            className="text-neon-blue font-semibold hover:text-neon-green transition-colors"
           >
             {view === 'login' ? 'Sign Up' : 'Login'}
           </button>
