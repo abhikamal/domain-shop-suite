@@ -154,6 +154,8 @@ const Auth = () => {
               description: 'This email is already registered. Please login instead.',
               variant: 'destructive',
             });
+            // Auto-switch to login view
+            setView('login');
           } else {
             toast({
               title: 'Signup Failed',
@@ -163,9 +165,10 @@ const Auth = () => {
           }
         } else {
           toast({
-            title: 'Verify Your Email',
-            description: 'Please check your email and click the verification link to complete signup.',
+            title: 'Account Created!',
+            description: 'Welcome! You are now logged in.',
           });
+          navigate('/');
         }
       }
     } catch (err) {
