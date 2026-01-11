@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAllowedDomain } from '@/hooks/useAllowedDomain';
@@ -11,21 +11,25 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Loader2, ArrowLeft, User, Phone } from 'lucide-react';
 import TermsDialog from '@/components/TermsDialog';
 
-type AuthView = 'login' | 'signup' | 'forgot-password';
+type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
 
 const Auth = () => {
+  const [searchParams] = useSearchParams();
   const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [errors, setErrors] = useState<{ 
     email?: string; 
     password?: string; 
+    confirmPassword?: string;
     fullName?: string; 
     username?: string;
     phoneNumber?: string;
@@ -38,6 +42,14 @@ const Auth = () => {
   const navigate = useNavigate();
 
   const domainsText = getDomainsText();
+
+  // Check if user arrived from password reset link
+  useEffect(() => {
+    const isReset = searchParams.get('reset') === 'true';
+    if (isReset) {
+      setView('reset-password');
+    }
+  }, [searchParams]);
 
   const emailSchema = z.string().email('Invalid email address').refine(
     (val) => validateEmail(val),
@@ -84,6 +96,42 @@ const Auth = () => {
       toast({
         title: 'Error',
         description: error.message || 'Failed to send reset link',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    if (password.length < 4) {
+      setErrors({ password: 'Password must be at least 4 characters' });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrors({ confirmPassword: 'Passwords do not match' });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Password Updated!',
+        description: 'Your password has been successfully reset. You are now logged in.',
+      });
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to reset password',
         variant: 'destructive',
       });
     } finally {
@@ -186,7 +234,88 @@ const Auth = () => {
     setView(newView);
     setErrors({});
     setAcceptedTerms(false);
+    setPassword('');
+    setConfirmPassword('');
   };
+
+  // Reset Password View
+  if (view === 'reset-password') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className="glass-card p-8 w-full max-w-md neon-border animate-scale-in">
+          <h2 className="text-2xl font-bold text-center text-neon-green mb-2 font-orbitron">
+            Reset Password
+          </h2>
+          <p className="text-center text-muted-foreground text-sm mb-6">
+            Enter your new password below
+          </p>
+
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="New Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-12 bg-surface-dark border-white/10 text-foreground placeholder:text-muted-foreground pr-10 focus:border-neon-green focus:ring-neon-green/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-neon-green transition-colors"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
+            </div>
+
+            <div className="relative">
+              <Input
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Confirm New Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full h-12 bg-surface-dark border-white/10 text-foreground placeholder:text-muted-foreground pr-10 focus:border-neon-green focus:ring-neon-green/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-neon-green transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 bg-neon-green text-black font-semibold rounded-lg hover:bg-neon-green/90 hover:shadow-neon-green transition-all font-rajdhani text-lg"
+            >
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Update Password'}
+            </Button>
+          </form>
+
+          <p className="text-center mt-6 text-sm text-muted-foreground">
+            Remember your password?{' '}
+            <button
+              onClick={() => {
+                navigate('/auth');
+                setView('login');
+              }}
+              className="text-neon-blue font-semibold hover:text-neon-green transition-colors"
+            >
+              Login
+            </button>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Forgot Password View
   if (view === 'forgot-password') {
