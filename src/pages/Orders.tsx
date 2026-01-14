@@ -191,7 +191,7 @@ const Orders = () => {
             <div>
               <div ref={receiptRef} className="bg-white p-4 rounded-lg">
                 <div className="header text-center border-b-2 border-dashed border-border pb-3 mb-4">
-                  <div className="logo text-2xl font-bold text-primary">EcoMart</div>
+                  <div className="logo text-2xl font-bold text-primary">HyperMart</div>
                   <div className="text-xs text-muted-foreground">Campus Marketplace</div>
                   <div className="receipt-no mt-2 text-sm font-medium">{selectedOrder.receipt_number}</div>
                 </div>
@@ -236,7 +236,7 @@ const Orders = () => {
                 )}
 
                 <div className="footer text-center mt-4 pt-3 border-t-2 border-dashed border-border text-xs text-muted-foreground">
-                  <p>Thank you for shopping with EcoMart!</p>
+                  <p>Thank you for shopping with HyperMart!</p>
                   <p className="mt-1">Questions? Contact us through the app.</p>
                 </div>
               </div>

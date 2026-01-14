@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/layout/Layout';
-import MouseSpotlight from '@/components/MouseSpotlight';
-import CyberCard from '@/components/CyberCard';
+import { ArrowRight, Zap, Shield, Sparkles, TrendingUp, Users, Package } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -17,7 +16,6 @@ const Index = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -47,221 +45,227 @@ const Index = () => {
     return null;
   }
 
+  const stats = [
+    { value: '10K+', label: 'Active Users', icon: Users },
+    { value: '50K+', label: 'Items Traded', icon: Package },
+    { value: '₹5L+', label: 'Saved by Students', icon: TrendingUp },
+  ];
+
   return (
     <Layout>
-      {/* Hero Section with Cyber Grid */}
-      <MouseSpotlight className="min-h-[70vh] flex items-center">
-        <section 
-          ref={heroRef}
-          className="relative w-full py-16 md:py-24 px-4 overflow-hidden cyber-grid animate-grid-move"
-        >
-          {/* Decorative Elements */}
-          <div className="absolute top-10 left-10 w-32 h-32 border border-neon/20 rotate-45 animate-float opacity-30" />
-          <div className="absolute bottom-20 right-10 w-24 h-24 border border-neon-cyan/20 rotate-12 animate-float opacity-30" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-neon rounded-full animate-pulse-glow" />
-          <div className="absolute bottom-1/3 left-1/4 w-2 h-2 bg-neon-cyan rounded-full animate-pulse-glow" style={{ animationDelay: '0.5s' }} />
+      {/* Hero Section - Asymmetric Split Design */}
+      <section className="min-h-[85vh] relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-bl from-neon/10 via-transparent to-transparent" />
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-neon/5 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 left-20 w-64 h-64 bg-neon-cyan/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
           
-          {/* Scan Line Overlay */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20">
-            <div className="absolute h-[2px] w-full bg-gradient-to-r from-transparent via-neon to-transparent animate-scan-line" />
+          {/* Grid overlay */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `linear-gradient(rgba(0,255,128,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,128,0.03) 1px, transparent 1px)`,
+              backgroundSize: '60px 60px'
+            }} />
           </div>
+        </div>
 
-          <div className="container mx-auto max-w-5xl text-center relative z-10">
-            {/* Glitch Title */}
-            <h1 
-              className="text-4xl md:text-6xl lg:text-7xl font-display font-bold mb-6 glitch-text text-neon neon-text-glow"
-              data-text="EVERY ITEM DESERVES A SECOND CHANCE"
-            >
-              <span className="bg-gradient-to-r from-neon via-neon-cyan to-neon bg-clip-text text-transparent animate-flicker">
-                EVERY ITEM DESERVES A
-              </span>
-              <br />
-              <span className="text-neon-cyan">SECOND CHANCE</span>
-            </h1>
-            
-            {/* Subtitle with fade in */}
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              Your campus-exclusive <span className="text-neon">cyberpunk marketplace</span> to buy, sell, or give away pre-loved items and promote sustainability.
-            </p>
-            
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in" style={{ animationDelay: '0.6s' }}>
-              <Link to="/products" className="cyber-button">
-                <span className="relative z-10 flex items-center gap-2">
-                  <span className="text-xl">⚡</span>
-                  Buy Items
+        <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="space-y-8">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-neon/30 bg-neon/5 backdrop-blur-sm animate-fade-in">
+                <Zap className="w-4 h-4 text-neon" />
+                <span className="text-sm font-medium text-neon">Campus-Only Marketplace</span>
+              </div>
+
+              {/* Main headline */}
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                <span className="text-foreground">Trade Smarter.</span>
+                <br />
+                <span className="bg-gradient-to-r from-neon via-neon-cyan to-neon bg-clip-text text-transparent">
+                  Live Better.
                 </span>
-              </Link>
-              <Link to="/sell" className="cyber-button-outline">
-                <span className="flex items-center gap-2">
-                  <span className="text-xl">🔮</span>
-                  Sell Items
-                </span>
-              </Link>
-            </div>
+              </h1>
 
-            {/* Decorative bottom line */}
-            <div className="mt-12 flex items-center justify-center gap-4">
-              <div className="h-[1px] w-20 bg-gradient-to-r from-transparent to-neon" />
-              <div className="w-3 h-3 border border-neon rotate-45" />
-              <div className="h-[1px] w-20 bg-gradient-to-l from-transparent to-neon-cyan" />
-            </div>
-          </div>
-        </section>
-      </MouseSpotlight>
+              {/* Subheadline */}
+              <p className="text-lg md:text-xl text-muted-foreground max-w-lg animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                Your campus hub for buying, selling, and discovering pre-loved treasures. 
+                <span className="text-neon-cyan"> One student's old is another's gold.</span>
+              </p>
 
-      {/* Categories Section */}
-      <section className="py-16 px-4 relative">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-neon mb-2">
-              BROWSE CATEGORIES
-            </h2>
-            <div className="h-[2px] w-32 mx-auto bg-gradient-to-r from-neon to-neon-cyan" />
-          </div>
-          
-          {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="aspect-square rounded-xl border border-neon/20 bg-cyber-surface/50 animate-pulse">
-                  <div className="flex flex-col items-center justify-center h-full p-4">
-                    <div className="w-16 h-16 bg-neon/10 rounded-full mb-4" />
-                    <div className="h-4 bg-neon/10 rounded w-20" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-              {categories.map((category, index) => (
-                <Link
-                  key={category.id}
-                  to={`/products?category=${encodeURIComponent(category.name)}`}
-                  className="block"
-                  style={{ animationDelay: `${index * 100}ms` }}
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                <Link 
+                  to="/products" 
+                  className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-neon to-neon-cyan text-background font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,128,0.4)] hover:scale-105"
                 >
-                  <CyberCard 
-                    className="aspect-square animate-fade-in"
-                    glowColor={index % 2 === 0 ? 'neon' : 'cyan'}
-                  >
-                    <div className="flex flex-col items-center justify-center h-full p-4">
-                      <div className="relative mb-4">
-                        <img
-                          src={category.icon_url || 'https://img.icons8.com/ios-filled/100/00ff80/box.png'}
-                          alt={category.name}
-                          className="w-14 h-14 md:w-16 md:h-16 transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_rgba(0,255,128,0.8)]"
-                        />
-                      </div>
-                      <h3 className="font-display font-semibold text-foreground group-hover:text-neon transition-colors text-center">
-                        {category.name}
-                      </h3>
-                    </div>
-                  </CyberCard>
+                  Explore Market
+                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Link>
-              ))}
+                <Link 
+                  to="/sell" 
+                  className="group inline-flex items-center gap-2 px-8 py-4 border-2 border-neon/50 text-neon font-bold rounded-xl transition-all duration-300 hover:bg-neon/10 hover:border-neon"
+                >
+                  Start Selling
+                </Link>
+              </div>
+
+              {/* Stats Row */}
+              <div className="flex flex-wrap gap-8 pt-8 border-t border-neon/10 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                {stats.map((stat, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-neon/10">
+                      <stat.icon className="w-5 h-5 text-neon" />
+                    </div>
+                    <div>
+                      <div className="font-display font-bold text-xl text-foreground">{stat.value}</div>
+                      <div className="text-xs text-muted-foreground">{stat.label}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          )}
+
+            {/* Right Content - Featured Categories Bento Grid */}
+            <div className="relative animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <div className="grid grid-cols-2 gap-4">
+                {loading ? (
+                  [...Array(4)].map((_, i) => (
+                    <div key={i} className={`${i === 0 ? 'col-span-2 h-40' : 'h-32'} rounded-2xl bg-cyber-surface/50 border border-neon/10 animate-pulse`} />
+                  ))
+                ) : (
+                  <>
+                    {/* Large featured category */}
+                    {categories[0] && (
+                      <Link
+                        to={`/products?category=${encodeURIComponent(categories[0].name)}`}
+                        className="col-span-2 h-40 rounded-2xl bg-gradient-to-br from-neon/20 to-neon-cyan/10 border border-neon/20 p-6 flex items-end justify-between group hover:border-neon/50 transition-all duration-300 overflow-hidden relative"
+                      >
+                        <div className="absolute top-4 right-4 opacity-20 group-hover:opacity-40 transition-opacity">
+                          <img src={categories[0].icon_url || ''} alt="" className="w-24 h-24" />
+                        </div>
+                        <div>
+                          <span className="text-xs text-neon uppercase tracking-wider">Popular</span>
+                          <h3 className="text-2xl font-display font-bold text-foreground mt-1">{categories[0].name}</h3>
+                        </div>
+                        <ArrowRight className="w-6 h-6 text-neon transition-transform group-hover:translate-x-1" />
+                      </Link>
+                    )}
+                    
+                    {/* Smaller category cards */}
+                    {categories.slice(1, 5).map((category, i) => (
+                      <Link
+                        key={category.id}
+                        to={`/products?category=${encodeURIComponent(category.name)}`}
+                        className={`h-32 rounded-2xl bg-cyber-surface/30 border border-neon/10 p-4 flex flex-col justify-between group hover:border-neon/30 hover:bg-cyber-surface/50 transition-all duration-300 ${i === 3 ? 'bg-gradient-to-br from-neon-cyan/10 to-transparent' : ''}`}
+                      >
+                        <img src={category.icon_url || ''} alt="" className="w-8 h-8 opacity-60 group-hover:opacity-100 transition-opacity" />
+                        <span className="font-medium text-foreground text-sm">{category.name}</span>
+                      </Link>
+                    ))}
+                  </>
+                )}
+              </div>
+              
+              {/* See all categories link */}
+              <Link 
+                to="/products" 
+                className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-neon transition-colors"
+              >
+                View all categories
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 px-4 relative">
-        {/* Background accents */}
-        <div className="absolute inset-0 cyber-grid opacity-30" />
+      {/* Value Props Section - Horizontal Cards */}
+      <section className="py-20 px-4 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neon/5 to-transparent" />
         
-        <div className="container mx-auto max-w-5xl relative z-10">
+        <div className="container mx-auto relative z-10">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-neon-cyan mb-2">
-              WHY CHOOSE US
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
+              Why <span className="text-neon">HyperMart</span>?
             </h2>
-            <div className="h-[2px] w-32 mx-auto bg-gradient-to-r from-neon-cyan to-neon" />
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Built by students, for students. A trusted space to trade within your campus community.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                icon: '🌱',
-                title: 'SUSTAINABLE',
-                description: 'Give pre-loved items a new home and reduce waste on campus.',
-                color: 'neon' as const,
+                icon: Shield,
+                title: 'Verified Community',
+                description: 'Trade with confidence. Only verified students from your campus can access the marketplace.',
+                gradient: 'from-neon/20',
               },
               {
-                icon: '🔒',
-                title: 'CAMPUS EXCLUSIVE',
-                description: 'Trade safely within your verified college community.',
-                color: 'cyan' as const,
+                icon: Zap,
+                title: 'Instant Listings',
+                description: 'List your items in seconds. Snap, describe, price, and publish - it\'s that simple.',
+                gradient: 'from-neon-cyan/20',
               },
               {
-                icon: '💎',
-                title: 'SAVE CREDITS',
-                description: 'Find incredible deals on books, gadgets, and more.',
-                color: 'mixed' as const,
+                icon: Sparkles,
+                title: 'Zero Platform Fees',
+                description: 'Keep 100% of your sales. We believe in enabling students, not taxing them.',
+                gradient: 'from-neon/20',
               },
-            ].map((feature, index) => (
-              <CyberCard
-                key={feature.title}
-                className="animate-fade-in"
-                glowColor={feature.color}
-                enableTilt={true}
+            ].map((feature, i) => (
+              <div 
+                key={i}
+                className={`group p-8 rounded-3xl bg-gradient-to-br ${feature.gradient} to-transparent border border-neon/10 hover:border-neon/30 transition-all duration-500`}
               >
-                <div className="p-8 text-center">
-                  {/* Top accent line */}
-                  <div className={`h-1 w-full mb-6 bg-gradient-to-r ${
-                    feature.color === 'neon' 
-                      ? 'from-neon/50 via-neon to-neon/50' 
-                      : feature.color === 'cyan'
-                      ? 'from-neon-cyan/50 via-neon-cyan to-neon-cyan/50'
-                      : 'from-neon/50 via-neon-cyan to-neon/50'
-                  }`} />
-                  
-                  <div className="text-5xl mb-4 animate-float" style={{ animationDelay: `${index * 200}ms` }}>
-                    {feature.icon}
-                  </div>
-                  
-                  <h3 className={`font-display font-bold text-xl mb-3 ${
-                    feature.color === 'neon' 
-                      ? 'text-neon' 
-                      : feature.color === 'cyan'
-                      ? 'text-neon-cyan'
-                      : 'bg-gradient-to-r from-neon to-neon-cyan bg-clip-text text-transparent'
-                  }`}>
-                    {feature.title}
-                  </h3>
-                  
-                  <p className="text-muted-foreground text-sm">
-                    {feature.description}
-                  </p>
+                <div className="w-14 h-14 rounded-2xl bg-neon/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon className="w-7 h-7 text-neon" />
                 </div>
-              </CyberCard>
+                <h3 className="text-xl font-display font-bold text-foreground mb-3">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Bottom CTA Section */}
+      {/* CTA Banner */}
       <section className="py-16 px-4">
-        <div className="container mx-auto max-w-3xl">
-          <CyberCard className="overflow-hidden" glowColor="mixed" enableTilt={false}>
-            <div className="p-8 md:p-12 text-center relative">
-              {/* Background pattern */}
-              <div className="absolute inset-0 cyber-grid opacity-20" />
-              
-              <h2 className="text-2xl md:text-3xl font-display font-bold mb-4 relative z-10">
-                <span className="text-neon">READY TO</span>{' '}
-                <span className="text-neon-cyan">START TRADING?</span>
+        <div className="container mx-auto">
+          <div className="relative rounded-3xl overflow-hidden">
+            {/* Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-neon/20 via-neon-cyan/10 to-neon/20" />
+            <div className="absolute inset-0" style={{
+              backgroundImage: `radial-gradient(circle at 20% 50%, rgba(0,255,128,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(0,255,255,0.1) 0%, transparent 50%)`
+            }} />
+            
+            <div className="relative z-10 py-16 px-8 text-center">
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
+                Ready to declutter & earn?
               </h2>
-              
-              <p className="text-muted-foreground mb-8 relative z-10">
-                Join the campus marketplace revolution. Buy, sell, and save.
+              <p className="text-muted-foreground max-w-xl mx-auto mb-8">
+                Turn your unused items into cash. Join thousands of students already trading on HyperMart.
               </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-                <Link to="/products" className="cyber-button">
-                  <span className="relative z-10">EXPLORE NOW</span>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Link 
+                  to="/sell" 
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-foreground text-background font-bold rounded-xl transition-all duration-300 hover:bg-foreground/90"
+                >
+                  List Your First Item
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+                <Link 
+                  to="/products" 
+                  className="inline-flex items-center gap-2 px-8 py-4 border border-foreground/20 text-foreground font-medium rounded-xl transition-all duration-300 hover:bg-foreground/5"
+                >
+                  Browse Deals
                 </Link>
               </div>
             </div>
-          </CyberCard>
+          </div>
         </div>
       </section>
     </Layout>

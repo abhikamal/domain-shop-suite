@@ -12,26 +12,26 @@ interface TermsDialogProps {
 }
 
 const terms = [
-  "Only currently enrolled students with valid college ID/email are allowed to register and use EcoMart.",
+  "Only currently enrolled students with valid college ID/email are allowed to register and use HyperMart.",
   "Users must provide accurate and up-to-date information at registration for verification purposes.",
-  "EcoMart is a platform connecting student buyers and sellers; EcoMart is not the seller or buyer of any items.",
+  "HyperMart is a platform connecting student buyers and sellers; HyperMart is not the seller or buyer of any items.",
   "Users agree to use the platform only for legal, lawful transactions of campus-relevant goods.",
   "Sellers are responsible for ensuring the accuracy, authenticity, and condition of items listed.",
-  "Buyers should confirm item condition before purchase. EcoMart does not guarantee item quality or condition.",
-  "EcoMart may charge commission or fees on sales, listing boosts, or optional services, payable by the seller or buyer as agreed.",
-  "All payments via EcoMart are subject to applicable taxes and GST as per Indian laws.",
+  "Buyers should confirm item condition before purchase. HyperMart does not guarantee item quality or condition.",
+  "HyperMart may charge commission or fees on sales, listing boosts, or optional services, payable by the seller or buyer as agreed.",
+  "All payments via HyperMart are subject to applicable taxes and GST as per Indian laws.",
   "Users shall not post illegal, dangerous, or prohibited items.",
   "Harassment, fraud, false listings, or abusive behavior will result in account suspension or legal action.",
-  "User data is collected and used per the EcoMart Privacy Policy.",
+  "User data is collected and used per the HyperMart Privacy Policy.",
   "Personal data shared during transactions will be protected and only used for platform operation.",
-  "Any feedback or suggestions provided by users about EcoMart may be used royalty-free by the platform to improve the service.",
-  "EcoMart provides tools for dispute reporting and mediation but does not directly resolve buyer-seller conflicts.",
+  "Any feedback or suggestions provided by users about HyperMart may be used royalty-free by the platform to improve the service.",
+  "HyperMart provides tools for dispute reporting and mediation but does not directly resolve buyer-seller conflicts.",
   "Users must attempt resolution in good faith and may seek legal remedies independently.",
-  "EcoMart is not liable for any damages, losses, or expenses arising from use of the platform or transactions conducted.",
+  "HyperMart is not liable for any damages, losses, or expenses arising from use of the platform or transactions conducted.",
   "The platform is provided \"as is\" without warranties of any kind.",
-  "EcoMart reserves the right to suspend or terminate accounts violating terms without prior notice.",
-  "EcoMart may update these Terms and Conditions at any time; continued use constitutes acceptance of changes.",
-  "These Terms are governed by Indian law, and disputes shall be subject to jurisdiction in the city where EcoMart is headquartered or operates."
+  "HyperMart reserves the right to suspend or terminate accounts violating terms without prior notice.",
+  "HyperMart may update these Terms and Conditions at any time; continued use constitutes acceptance of changes.",
+  "These Terms are governed by Indian law, and disputes shall be subject to jurisdiction in the city where HyperMart is headquartered or operates."
 ];
 
 const TermsDialog = ({ children }: TermsDialogProps) => {
@@ -41,7 +41,7 @@ const TermsDialog = ({ children }: TermsDialogProps) => {
       <DialogContent className="max-w-2xl max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-primary">
-            EcoMart Terms and Conditions
+            HyperMart Terms and Conditions
           </DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">
